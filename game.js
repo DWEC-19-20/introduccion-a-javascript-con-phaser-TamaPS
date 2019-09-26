@@ -7,23 +7,48 @@ var items;
 var cursors;
 var jumpButton;
 var text;
+var text2;
 var winningMessage;
+var losingMessage;
 var won = false;
+var lose = false;
 var currentScore = 0;
+var currentLives = 2;
 var winningScore = 100;
 
 // add collectable items to the game
 function addItems() {
   items = game.add.physicsGroup();
-  createItem(375, 300, 'coin');
+  createItem(180, 180, 'coin'); 
+  createItem(40, 240, 'coin');  
+  createItem(500, 90, 'coin'); 
+  createItem(620, 200, 'coin'); 
+  createItem(500, 250, 'coin'); 
+  createItem(320, 350, 'coin'); 
+  createItem(550, 450, 'coin'); 
+  createItem(230, 450, 'coin');  
+  createItem(370, 500, 'poison');
+  createItem(100, 375, 'poison');
+  createItem(125, 50, 'star');
+
 }
 
 // add platforms to the game
 function addPlatforms() {
   platforms = game.add.physicsGroup();
-  platforms.create(450, 150, 'platform');
+  platforms.create(450, 150, 'platform2'); 
+  platforms.create(600, 250, 'platform');   
+  platforms.create(80, 80, 'platform2');  
+  platforms.create(200, 130, 'platform');  
+  platforms.create(100, 230, 'platform'); 
+  platforms.create(30, 290, 'platform'); 
+  platforms.create(400, 300, 'platform2'); 
+  platforms.create(250, 400, 'platform2');
+  platforms.create(450, 500, 'platform'); 
+  platforms.create(100, 500, 'platform'); 
   platforms.setAll('body.immovable', true);
 }
+
 
 // create a single animated item and add to screen
 function createItem(left, top, image) {
@@ -35,7 +60,7 @@ function createItem(left, top, image) {
 // create the winning badge and add to screen
 function createBadge() {
   badges = game.add.physicsGroup();
-  var badge = badges.create(750, 400, 'badge');
+  var badge = badges.create(500, 400, 'badge');
   badge.animations.add('spin');
   badge.animations.play('spin', 10, true);
 }
@@ -43,7 +68,23 @@ function createBadge() {
 // when the player collects an item on the screen
 function itemHandler(player, item) {
   item.kill();
-  currentScore = currentScore + 10;
+  switch (item.key){
+    case 'coin':
+    currentScore = currentScore + 10; 
+    break; 
+
+    case 'poison':
+    currentScore = currentScore -10;
+    if (currentScore<=0){
+      currentLives=currentLives-1;
+    }
+    break; 
+
+    case 'star':
+    currentScore = currentScore + 20; 
+    break; 
+  }  
+
   if (currentScore === winningScore) {
       createBadge();
   }
@@ -61,15 +102,20 @@ window.onload = function () {
   
   // before the game begins
   function preload() {
-    game.stage.backgroundColor = '#5db1ad';
+    game.stage.backgroundColor = '#b99';
     
     //Load images
     game.load.image('platform', 'platform_1.png');
+    game.load.image('platform2', 'platform_2.png');
     
     //Load spritesheets
-    game.load.spritesheet('player', 'chalkers.png', 48, 62);
+    game.load.spritesheet('player', 'mikethefrog.png', 32, 32);
     game.load.spritesheet('coin', 'coin.png', 36, 44);
     game.load.spritesheet('badge', 'badge.png', 42, 54);
+    game.load.spritesheet('poison', 'poison.png', 32, 0);
+    game.load.spritesheet('star', 'star.png', 32, 30);
+
+
   }
 
   // initial game set up
@@ -87,13 +133,18 @@ window.onload = function () {
     cursors = game.input.keyboard.createCursorKeys();
     jumpButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     text = game.add.text(16, 16, "SCORE: " + currentScore, { font: "bold 24px Arial", fill: "white" });
+    text2 = game.add.text(650, 16, "LIVES: " + currentLives, { font: "bold 24px Arial", fill: "white" });
     winningMessage = game.add.text(game.world.centerX, 275, "", { font: "bold 48px Arial", fill: "white" });
     winningMessage.anchor.setTo(0.5, 1);
+    losingMessage = game.add.text(game.world.centerX, 275, "", { font: "bold 48px Arial", fill: "white" });
+    losingMessage.anchor.setTo(0.5, 1);
   }
 
   // while the game is running
   function update() {
+
     text.text = "SCORE: " + currentScore;
+    text2.text = "LIVES: " + currentLives;
     game.physics.arcade.collide(player, platforms);
     game.physics.arcade.overlap(player, items, itemHandler);
     game.physics.arcade.overlap(player, badges, badgeHandler);
@@ -122,6 +173,9 @@ window.onload = function () {
     // when the player winw the game
     if (won) {
       winningMessage.text = "YOU WIN!!!";
+    }
+    else if (currentLives <= 0){
+      losingMessage.text = "GAME OVER!!!";
     }
   }
 
